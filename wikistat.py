@@ -74,37 +74,54 @@ def parse(start, end, path):
 
         body = soup.find(id="bodyContent")
 
-        # TODO посчитать реальные значения
+        # Количество картинок (img) с шириной (width) не меньше 200 +
         images = body.find_all(class_='image')
         imgs = 0
         headers = 0
         for image in images:
             if int(image.img['width']) >= 200:
                 imgs += 1
+
+        # Количество заголовков, первая буква текста внутри которого: E, T или C +
         reg_header = re.compile(r'^h\d*')
         all_headers = body.find_all(class_='mw-headline')
-        all_headers = all_headers + [i for i in body.find(
-            class_='toctitle').find(reg_header)]
+        all_headers = all_headers + \
+            [i for i in body.find(class_='toctitle').find(reg_header)]
         for header in all_headers:
 
             if header.string is not None:
 
                 if header.string[0] == 'E':
                     headers += 1
-                    print('<{}> {} <{}>'.format(
-                        header.name, header.string, header.name))
+
                 if header.string[0] == 'C':
                     headers += 1
-                    print('<{}> {} <{}>'.format(
-                        header.name, header.string, header.name))
+
                 if header.string[0] == 'T':
-                    print('<{}> {} <{}>'.format(
-                        header.name, header.string, header.name))
                     headers += 1
 
-        # Количество картинок (img) с шириной (width) не меньше 200 +
-        # Количество заголовков, первая буква текста внутри которого: E, T или C +
-        linkslen = 15  # Длина максимальной последовательности ссылок, между которыми нет других тегов
+        linkslen = 0  # Длина максимальной последовательности ссылок, между которыми нет других тегов
+        tag_a = body.find_next('a')
+        max_len = 0
+        while tag_a is not None:
+
+            if tag_a != '\n':
+                # print(tag_a.name)
+                if tag_a.name is 'a' and 'a' not in [tag.name for tag in tag_a.parents]:
+
+                    linkslen += 1
+                else:
+
+                    if 'a' in [tag.name for tag in tag_a.parents]:
+                        print('вложенная ссылка')
+
+                    else:
+                        if max_len < linkslen:
+                            max_len = linkslen
+                        linkslen = 0
+
+            tag_a = tag_a.find_next()
+        linkslen = max_len
         lists = 20  # Количество списков, не вложенных в другие списки
 
         out[file] = [imgs, headers, linkslen, lists]
