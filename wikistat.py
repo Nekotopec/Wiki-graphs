@@ -51,7 +51,7 @@ def build_bridge(start, end, path):
     while key != start:
         bridge.append(files[key])
         key = files[key]
-    print(bridge[::-1])
+    # print(bridge[::-1])
     return bridge[::-1]
 
 
@@ -91,37 +91,36 @@ def parse(start, end, path):
 
             if header.string is not None:
 
-                if header.string[0] == 'E':
-                    headers += 1
-
-                if header.string[0] == 'C':
-                    headers += 1
-
-                if header.string[0] == 'T':
+                if header.string[0] in 'ECT':
                     headers += 1
 
         linkslen = 0  # Длина максимальной последовательности ссылок, между которыми нет других тегов
         tag_a = body.find_next('a')
         max_len = 0
+        index_key = 1
+        debag_dict = dict()
         while tag_a is not None:
-
-            if tag_a != '\n':
-                # print(tag_a.name)
-                if tag_a.name is 'a' and 'a' not in [tag.name for tag in tag_a.parents]:
-
-                    linkslen += 1
-                else:
-
-                    if 'a' in [tag.name for tag in tag_a.parents]:
-                        print('вложенная ссылка')
-
+            debag_dict[index_key] = list()
+            # print(tag_a.name)
+            for broths in tag_a.find_next_siblings():
+                debag_dict[index_key].append(broths)
+                if True:
+                    if broths.name is 'a':
+                        linkslen += 1
                     else:
-                        if max_len < linkslen:
-                            max_len = linkslen
                         linkslen = 0
+                        continue
 
-            tag_a = tag_a.find_next()
+            if max_len < linkslen:
+                max_len = linkslen
+                max_key = index_key
+            index_key += 1
+            linkslen = 0
+            tag_a = tag_a.find_next('a')
         linkslen = max_len
+        for i in debag_dict[max_key]:
+            print(i)
+        print('______________________________________________________________________')
         lists = 20  # Количество списков, не вложенных в другие списки
 
         out[file] = [imgs, headers, linkslen, lists]
