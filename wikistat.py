@@ -94,30 +94,37 @@ def parse(start, end, path):
                 if header.string[0] in 'ECT':
                     headers += 1
 
-        linkslen = 0  # Длина максимальной последовательности ссылок, между которыми нет других тегов
+        linkslen = 1  # Длина максимальной последовательности ссылок, между которыми нет других тегов
         tag_a = body.find_next('a')
         max_len = 0
         index_key = 1
         debag_dict = dict()
-        while tag_a is not None:
+        while tag_a:
             debag_dict[index_key] = list()
+            debag_dict[index_key].append(tag_a)
             # print(tag_a.name)
+            # print(tag_a.name)
+            linkslen = 1
             for broths in tag_a.find_next_siblings():
+                # print(broths.name)
                 debag_dict[index_key].append(broths)
-                if True:
-                    if broths.name is 'a':
-                        linkslen += 1
-                    else:
-                        linkslen = 0
-                        continue
+                if broths.name == 'a':
+                    linkslen += 1
+                else:
+                    if max_len < linkslen:
+                        max_len = linkslen
+                        max_key = index_key
+
+                    linkslen = 0
+                    continue
 
             if max_len < linkslen:
                 max_len = linkslen
                 max_key = index_key
             index_key += 1
-            linkslen = 0
             tag_a = tag_a.find_next('a')
         linkslen = max_len
+        print('______________________________________________________________________')
         for i in debag_dict[max_key]:
             print(i)
         print('______________________________________________________________________')
