@@ -102,21 +102,16 @@ def parse(start, end, path):
         while tag_a:
             debag_dict[index_key] = list()
             debag_dict[index_key].append(tag_a)
-            # print(tag_a.name)
-            # print(tag_a.name)
+
             linkslen = 1
             for broths in tag_a.find_next_siblings():
-                # print(broths.name)
+
                 debag_dict[index_key].append(broths)
                 if broths.name == 'a':
                     linkslen += 1
                 else:
-                    if max_len < linkslen:
-                        max_len = linkslen
-                        max_key = index_key
-
-                    linkslen = 0
-                    continue
+                    tag_a = broths
+                    break
 
             if max_len < linkslen:
                 max_len = linkslen
@@ -124,11 +119,15 @@ def parse(start, end, path):
             index_key += 1
             tag_a = tag_a.find_next('a')
         linkslen = max_len
-        print('______________________________________________________________________')
         for i in debag_dict[max_key]:
             print(i)
-        print('______________________________________________________________________')
-        lists = 20  # Количество списков, не вложенных в другие списки
+        lists = 0  # Количество списков, не вложенных в другие списки
+        tag_l = body.find_all('ol')
+        tag_l = tag_l + body.find_all('ul')
+        for tag in tag_l:
+            parents = [tags.name for tags in tag.parents]
+            if 'ul' not in parents and 'ol' not in parents:
+                lists += 1
 
         out[file] = [imgs, headers, linkslen, lists]
     print(out)
