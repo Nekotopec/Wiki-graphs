@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import re
 import os
+import requests
 
 
 # Вспомогательная функция, её наличие не обязательно и не будет проверяться
@@ -8,7 +9,7 @@ def build_tree(start, end, path):
     # Искать ссылки можно как угодно, не обязательно через re
     link_re = re.compile(r"^/wiki/([A-Za-z0-9_\(\)]+)$")
     # Словарь вида {"filename1": None, "filename2": None, ...}
-    files = dict.fromkeys(os.listdir(path))
+    files = dict()
     # TODO Проставить всем ключам в files правильного родителя в значение, начиная от start
     marker = True
     i = 0
@@ -18,9 +19,11 @@ def build_tree(start, end, path):
     while marker and i < 10:
         step[i + 1] = list()
         for file in step[i]:
-
-            with open("{}{}".format(path, file), 'r') as data:
-                soup = BeautifulSoup(data, "lxml")
+            page = requests.get(
+                'https://en.wikipedia.org/wiki/{}'.format(file)).text
+            soup = BeautifulSoup(page, "lxml")
+            # with open("{}{}".format(path, file), 'r') as data:
+            #     soup = BeautifulSoup(data, "lxml")
             section = soup.find(name='div', id='bodyContent')
             list_ = section.find_all(name='a', attrs={'href': link_re})
 
@@ -32,10 +35,10 @@ def build_tree(start, end, path):
                     marker = False
                     files[tag] = file
                     break
-
-                if tag in files and files[tag] is None:
+                elif tag not in files:
                     files[tag] = file
                     step[i + 1].append(tag)
+
         i += 1
 
     # print(files[end])
@@ -69,8 +72,10 @@ def parse(start, end, path):
     # Когда есть список страниц, из них нужно вытащить данные и вернуть их
     out = {}
     for file in bridge:
-        with open("{}{}".format(path, file)) as data:
-            soup = BeautifulSoup(data, "lxml")
+
+        page = requests.get(
+            'https://en.wikipedia.org/wiki/{}'.format(file)).text
+        soup = BeautifulSoup(page, "lxml")
 
         body = soup.find(id="bodyContent")
 

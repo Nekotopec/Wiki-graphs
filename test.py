@@ -6,8 +6,8 @@ correct = {
     'Artificial_intelligence': [8, 19, 13, 198],
     'Python_(programming_language)': [2, 5, 17, 41],
 }
-start = 'Stone_Age'
-end = 'Python_(programming_language)'
+start = 'Greenpeace'
+end = 'Adolf_Hitler'
 path = './wiki/'
 
 count = 0
